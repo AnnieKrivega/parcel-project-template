@@ -1,34 +1,39 @@
-import { galleryItems } from './gallery-items';
 import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist.simple-lightbox.min.css'
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import { galleryItems } from './gallery-items.js';
 
-console.log(galleryItems);
+const gallery = document.querySelector('.gallery');
 
-const gallery = document.querySelector('.gallery')
-const items = [];
+const createGalleryMarkup = items => {
+return items
+    .map(({ preview, original, description }) => {
+    return `
+        <li class="gallery__item">
+        <a class="gallery__link" href="${original}">
+            <img class="gallery__image" src="${preview}" alt="${description}" />
+        </a>
+        </li>
+`;
+    })
+    .join('');
+};
 
-galleryItems.forEach(element => {
-    const galleryItem = document.createElement('div')
-    galleryItem.className = 'gallery__item'
-    const galleryLink = document.createElement('a')
-    galleryLink.className = 'gallery__link'
-    galleryLink.href = element.original
-    const galleryImage = document.createElement('img')
-    galleryImage.className = 'gallery__image'
-    galleryImage.src = element.preview;
-    galleryImage.setAttribute('data-source', element.original)
-    galleryImage.set = element.description;
+gallery.innerHTML += createGalleryMarkup(galleryItems);
 
-    galleryItem.append(galleryLink)
-    galleryLink.append(galleryImage)
-    items.push(galleryItem)
-})
+const lightboxOptions = {
+captions: true,
+captionsData: 'alt',
+captionDelay: 250,
+};
 
-gallery.append(...items)
+const lightbox = new SimpleLightbox('.gallery a', lightboxOptions);
 
-gallery.addEventListener('click', e => {
-    e.preventDefault();
-    if (e.target.nodeName !== 'IMG') {
-        return
-    }
-})
+const openImage = event => {
+event.preventDefault();
+lightbox.open({
+    source: event.target.parentNode.href,
+    caption: event.target.alt,
+});
+};
+
+gallery.addEventListener('click', openImage);
